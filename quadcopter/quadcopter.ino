@@ -11,67 +11,74 @@ Servo esc4;
 int escPin1 = 8;
 int escPin2 = 9;
 int escPin3 = 10;
-int escPin4 = 12;
+int escPin4 = 11;
+boolean on  = false;
 
 //Min and max pulse
 int minPulseRate   = 1000;
 int maxPulseRate   = 2000;
-int throttleChange = 50;
+int throttleChange = 20;
 
 //Radio
 int RX  = 0;
 int TX  = 1;
-int SET = 7;
-//SoftwareSerial apc220(RX, TX);
+
+SoftwareSerial apc220(RX, TX);
 
 //SETUP
 void setup() {
-  //Turn on the radio
-  digitalWrite(SET, HIGH);
-  
-  Serial.begin(9600); 
-  //apc220.begin(9600);
+  //Serial.begin(9600); 
+  apc220.begin(9600);
   
   //Init escs
+  Serial.println("Init escs");
   initEscs();
 }
 
 //LOOP
 void loop() {
-  /*char msg = apc220.read();
-  
-  if (msg == 'l') {
-    startUpMotors();
-    
-  } else if (msg == 'q') {
-    writeTo4Escs(0);
-    
-  } else if (msg != 'l' && msg != 'q' && msg > 0) {
-    int throttle = normalizeThrottle(apc220.parseInt());
-    
-    writeTo4Escs(throttle);
-  }*/
-  
-  if (Serial.available() > 0) {
-
-    // Read the new throttle value
-    int throttle = normalizeThrottle(Serial.parseInt());
-    
-    // Print it out
-    Serial.print("Setting throttle to: ");
-    Serial.println(throttle);
-    
-    // Change throttle to the new value
-    writeTo4Escs(throttle);
-    
+  if (apc220.available() > 0) {
+    char rCommand = apc220.read();
+    execCommand(rCommand);
   }
+  
+  /*if (Serial.available() > 0) {
+    char command = Serial.read();
+    execCommand(command);
+  }*/
 }
  
+ 
+//Exec command
+void execCommand(char command) {
+  if (command == 's' && on == false) {
+    startUpMotors();
+    on = true;  
+  }
+  
+  if (on == true) {
+    if (command == 'q') {
+      writeTo4Escs(0);
+      on = false;
+      
+    } else if (command == 'm') {
+      writeTo4Escs(20);
+      
+    } else if (command == 'u') {
+      throttleUp();
+      
+    } else if (command == 'd') {
+      throttleDown();
+    }
+  }
+}
+
 //Change throttle value
 void writeTo4Escs(int throttle) {
   int currentThrottle = readThrottle();
   
   int step = 1;
+  
   if(throttle < currentThrottle) {
     step = -1;
   }
@@ -86,6 +93,18 @@ void writeTo4Escs(int throttle) {
     currentThrottle = readThrottle();
     delay(throttleChange);
   }
+}
+
+//Throttle speed up
+void throttleUp() {
+  int currentThrottle = readThrottle();
+  writeTo4Escs(currentThrottle + 1);
+}
+
+//Throttle speed down
+void throttleDown() {
+  int currentThrottle = readThrottle();
+  writeTo4Escs(currentThrottle - 1);
 }
 
 //Read the throttle value
