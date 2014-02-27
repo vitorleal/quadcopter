@@ -1,6 +1,6 @@
 #include <Servo.h>
 #include <SoftwareSerial.h>
- 
+
 //Create the 4 esc objects
 Servo esc1;
 Servo esc2;
@@ -27,9 +27,9 @@ SoftwareSerial apc220(RX, TX);
 
 //SETUP
 void setup() {
-  //Serial.begin(9600); 
+  //Serial.begin(9600);
   apc220.begin(9600);
-  
+
   //Init escs
   Serial.println("Init escs");
   initEscs();
@@ -41,32 +41,32 @@ void loop() {
     char rCommand = apc220.read();
     execCommand(rCommand);
   }
-  
+
   /*if (Serial.available() > 0) {
     char command = Serial.read();
     execCommand(command);
   }*/
 }
- 
- 
+
+
 //Exec command
 void execCommand(char command) {
   if (command == 's' && on == false) {
     startUpMotors();
-    on = true;  
+    on = true;
   }
-  
+
   if (on == true) {
     if (command == 'q') {
       writeTo4Escs(0);
       on = false;
-      
+
     } else if (command == 'm') {
       writeTo4Escs(20);
-      
+
     } else if (command == 'u') {
       throttleUp();
-      
+
     } else if (command == 'd') {
       throttleDown();
     }
@@ -76,20 +76,20 @@ void execCommand(char command) {
 //Change throttle value
 void writeTo4Escs(int throttle) {
   int currentThrottle = readThrottle();
-  
+
   int step = 1;
-  
+
   if(throttle < currentThrottle) {
     step = -1;
   }
-  
-  // Slowly move to the new throttle value 
+
+  // Slowly move to the new throttle value
   while(currentThrottle != throttle) {
     esc1.write(currentThrottle + step);
     esc2.write(currentThrottle + step);
     esc3.write(currentThrottle + step);
     esc4.write(currentThrottle + step);
-    
+
     currentThrottle = readThrottle();
     delay(throttleChange);
   }
@@ -110,10 +110,10 @@ void throttleDown() {
 //Read the throttle value
 int readThrottle() {
   int throttle = esc1.read();
-  
+
   Serial.print("Current throttle is: ");
   Serial.println(throttle);
-  
+
   return throttle;
 }
 
@@ -123,7 +123,7 @@ void initEscs() {
   esc2.attach(escPin2, minPulseRate, maxPulseRate);
   esc3.attach(escPin3, minPulseRate, maxPulseRate);
   esc4.attach(escPin4, minPulseRate, maxPulseRate);
-  
+
   esc1.write(0);
   esc2.write(0);
   esc3.write(0);
@@ -134,15 +134,15 @@ void initEscs() {
 void startUpMotors() {
   writeTo4Escs(50);
 }
- 
+
 // Ensure the throttle value is between 0 - 180
 int normalizeThrottle(int value) {
-  if(value < 0) {
+  if (value < 0) {
     return 0;
-    
-  } else if(value > 180) {
+
+  } else if (value > 180) {
     return 180;
   }
-  
+
   return value;
 }
