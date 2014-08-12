@@ -1,7 +1,10 @@
 #My Quadcopter
 This is the source code of my quad.
 
-List of itens used:
+![My Quad](https://raw.githubusercontent.com/vitorleal/quadcopter/master/resources/img/quad.gif "Vitor Leal QuadCopter")
+
+
+##List of itens used:
 
 - 2 APC220 RF modules
 - 4 ESC's 20A
