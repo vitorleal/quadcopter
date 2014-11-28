@@ -62,7 +62,7 @@ void execCommand(char command) {
       on = false;
 
     } else if (command == 'm') {
-      writeTo4Escs(20);
+      writeTo4Escs(40);
 
     } else if (command == 'u') {
       throttleUp();
@@ -86,13 +86,15 @@ void writeTo4Escs(int throttle) {
   // Slowly move to the new throttle value
   while(currentThrottle != throttle) {
     esc1.write(currentThrottle + step);
-    esc2.write(currentThrottle + step);
     esc3.write(currentThrottle + step);
+    esc2.write(currentThrottle + step);
     esc4.write(currentThrottle + step);
 
     currentThrottle = readThrottle();
     delay(throttleChange);
   }
+  
+  apc220.write(throttle);
 }
 
 //Throttle speed up
